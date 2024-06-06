@@ -1,0 +1,17 @@
+import type { RouteProp } from "@react-navigation/native";
+
+// these are defining types of parameters
+export type MainStackParamList = {
+  Home: undefined; // Assuming no parameters are passed to Home
+  Drawer: undefined;
+  Main: undefined;
+  Account: undefined;
+  MonitorSeats: undefined;
+};
+
+export type AuthStackParamList = {
+  Login: undefined;
+  CreateNewAccount: undefined;
+  Drawer: undefined;
+  Main: undefined;
+};
