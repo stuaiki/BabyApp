@@ -8,6 +8,7 @@ import { BackHandler } from "react-native";
 import Splash from "../screens/Splash";
 import Account from "../screens/Account";
 import MonitorSeats from "../screens/MonitorSeats";
+import AlertSetting from "../screens/AlertSetting";
 
 // contents inside of drawaer
 const DrawerNavigation = () => {
@@ -25,6 +26,7 @@ const DrawerNavigation = () => {
       <Drawer.Screen name="Home" component={Home} />
       <Drawer.Screen name="MonitorSeats" component={MonitorSeats} />
       <Drawer.Screen name="Account" component={Account} />
+      <Drawer.Screen name="AlertSetting" component={AlertSetting} />
     </Drawer.Navigator>
   );
 };

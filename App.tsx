@@ -1,23 +1,30 @@
-import { SafeAreaView, StyleSheet, Text, View, StatusBar, Image } from "react-native";
-import RootNavigator from './src/navigation/RootNavigator';
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  StatusBar,
+  Image,
+} from "react-native";
+import RootNavigator from "./src/navigation/RootNavigator";
 import "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createDrawerNavigator } from "@react-navigation/drawer";
 import LoginScreen from "./src/screens/Login"; // Correct path to LoginScreen
-import HomeScreen from "./src/screens/Home"; // Correct path to HomeScreen
+import HomeScreen from "./src/screens/Home";
 import CreateAccount from "./src/screens/CreateNewAccount";
 import { MainStackParamList } from "../BabyApp/src/types/navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 const App = () => {
   return (
     <>
       <RootNavigator />
     </>
-  )
-}
+  );
+};
 
 // function App() {
 //   return (

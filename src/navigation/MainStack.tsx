@@ -11,6 +11,7 @@ import Login from "../screens/Login";
 import CreateNewAccount from "../screens/CreateNewAccount";
 import Account from "../screens/Account";
 import MonitorSeats from "../screens/MonitorSeats";
+import AlertSetting from "../screens/AlertSetting";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -27,6 +28,7 @@ const MainStack = () => {
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="MonitorSeats" component={MonitorSeats} />
       <Stack.Screen name="Account" component={Account} />
+      <Stack.Screen name="AlertSetting" component={AlertSetting} />
     </Stack.Navigator>
   );
 };

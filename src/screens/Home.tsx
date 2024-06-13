@@ -14,6 +14,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MainStackParamList } from "../types/navigation";
 import { useNavigation } from "@react-navigation/native";
 import Account from "./Account";
+import AlertSetting from "./AlertSetting";
 
 const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
   return (
@@ -24,7 +25,7 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
           onPress={() => navigation.navigate("MonitorSeats")}
         >
           <Image
-            source={require("../../assets/favicon.png")}
+            source={require("../../assets/carseatRender.png")}
             style={styles.icon}
           />
           <Text style={styles.text}>Monitor Seats</Text>
@@ -32,9 +33,10 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
 
         <TouchableOpacity
           style={[styles.wideButton, styles.buttonContainer, styles.background]}
+          onPress={() => navigation.navigate("AlertSetting")}
         >
           <Image
-            source={require("../../assets/carseatRender.png")}
+            source={require("../../assets/favicon.png")}
             style={styles.icon}
           />
           <Text style={styles.text}>Active Safety Alerts</Text>

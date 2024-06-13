@@ -7,6 +7,7 @@ export type MainStackParamList = {
   Main: undefined;
   Account: undefined;
   MonitorSeats: undefined;
+  AlertSetting: undefined;
 };
 
 export type AuthStackParamList = {
