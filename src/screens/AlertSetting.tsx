@@ -15,7 +15,9 @@ import { MainStackParamList } from "../types/navigation";
 import { useNavigation } from "@react-navigation/native";
 import Account from "./Account";
 
-const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
+const AlertSetting = ({
+  navigation,
+}: NativeStackScreenProps<MainStackParamList>) => {
   return (
     <View
       style={[styles.container, styles.whitebackground, styles.contentPosition]}
@@ -23,20 +25,21 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
       <Text style={styles.headText}>Alert Settings</Text>
       <TouchableOpacity
         style={[styles.wideButton, styles.buttonContainer, styles.background]}
-        onPress={() => navigation.navigate("MonitorSeats")}
+        onPress={() => navigation.navigate("AlertMeWhen")}
       >
         <Text style={styles.text}>Alert me when...</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={[styles.wideButton, styles.buttonContainer, styles.background]}
+        onPress={() => navigation.navigate("NotifyMeThrough")}
       >
         <Text style={styles.text}>Notify me through...</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={[styles.wideButton, styles.buttonContainer, styles.background]}
-        onPress={() => navigation.navigate("MonitorSeats")}
+        onPress={() => navigation.navigate("NotifyMeThrough")}
       >
         <Text style={styles.text}>People to Alert</Text>
       </TouchableOpacity>
@@ -92,4 +95,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Home;
+export default AlertSetting;

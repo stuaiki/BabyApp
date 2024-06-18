@@ -8,6 +8,8 @@ export type MainStackParamList = {
   Account: undefined;
   MonitorSeats: undefined;
   AlertSetting: undefined;
+  AlertMeWhen: undefined;
+  NotifyMeThrough: undefined;
 };
 
 export type AuthStackParamList = {

@@ -12,6 +12,8 @@ import CreateNewAccount from "../screens/CreateNewAccount";
 import Account from "../screens/Account";
 import MonitorSeats from "../screens/MonitorSeats";
 import AlertSetting from "../screens/AlertSetting";
+import AlertMeWhen from "../screens/AlertMeWhen";
+import NotifyMeThrough from "../screens/NotifyMeThrough";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -29,6 +31,8 @@ const MainStack = () => {
       <Stack.Screen name="MonitorSeats" component={MonitorSeats} />
       <Stack.Screen name="Account" component={Account} />
       <Stack.Screen name="AlertSetting" component={AlertSetting} />
+      <Stack.Screen name="AlertMeWhen" component={AlertMeWhen} />
+      <Stack.Screen name="NotifyMeThrough" component={NotifyMeThrough} />
     </Stack.Navigator>
   );
 };

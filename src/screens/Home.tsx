@@ -33,7 +33,6 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
 
         <TouchableOpacity
           style={[styles.wideButton, styles.buttonContainer, styles.background]}
-          onPress={() => navigation.navigate("AlertSetting")}
         >
           <Image
             source={require("../../assets/favicon.png")}
@@ -60,7 +59,10 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
           <Text style={styles.buttonText}>Add a Seat</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.button, styles.background]}>
+        <TouchableOpacity
+          style={[styles.button, styles.background]}
+          onPress={() => navigation.navigate("AlertSetting")}
+        >
           <Image
             source={require("../../assets/favicon.png")}
             style={styles.icon}

@@ -1,18 +1,17 @@
 import React from "react";
+import { StyleSheet } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Home from "../screens/Home";
-import Login from "../screens/Login";
-import CreateAccount from "../screens/CreateNewAccount";
-import CustomDrawerContent from "./CustomDrawerContent ";
-import { BackHandler } from "react-native";
-import Splash from "../screens/Splash";
 import Account from "../screens/Account";
 import MonitorSeats from "../screens/MonitorSeats";
 import AlertSetting from "../screens/AlertSetting";
+import AlertMeWhen from "../screens/AlertMeWhen";
+import CustomDrawerContent from "../navigation/CustomDrawerContent ";
+import NotifyMeThrough from "../screens/NotifyMeThrough";
 
-// contents inside of drawaer
+const Drawer = createDrawerNavigator();
+
 const DrawerNavigation = () => {
-  const Drawer = createDrawerNavigator();
   return (
     <Drawer.Navigator
       initialRouteName="Home"
@@ -27,8 +26,42 @@ const DrawerNavigation = () => {
       <Drawer.Screen name="MonitorSeats" component={MonitorSeats} />
       <Drawer.Screen name="Account" component={Account} />
       <Drawer.Screen name="AlertSetting" component={AlertSetting} />
+      <Drawer.Screen
+        name="AlertMeWhen"
+        component={AlertMeWhen}
+        options={{
+          drawerItemStyle: styles.disabledItem,
+          drawerLabel: "Alert Me When",
+        }}
+        listeners={({ navigation }) => ({
+          drawerItemPress: (e) => {
+            // Prevent navigation if the item is disabled
+            e.preventDefault();
+          },
+        })}
+      />
+      <Drawer.Screen
+        name="NotifyMeThrough"
+        component={NotifyMeThrough}
+        options={{
+          drawerItemStyle: styles.disabledItem,
+          drawerLabel: "Notify Me Through",
+        }}
+        listeners={({ navigation }) => ({
+          drawerItemPress: (e) => {
+            // Prevent navigation if the item is disabled
+            e.preventDefault();
+          },
+        })}
+      />
     </Drawer.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  disabledItem: {
+    opacity: 0, // makes the item look disabled
+  },
+});
 
 export default DrawerNavigation;
