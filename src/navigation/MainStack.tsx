@@ -14,6 +14,9 @@ import MonitorSeats from "../screens/MonitorSeats";
 import AlertSetting from "../screens/AlertSetting";
 import AlertMeWhen from "../screens/AlertMeWhen";
 import NotifyMeThrough from "../screens/NotifyMeThrough";
+import ActiveSafetyAlert from "../screens/ActiveSafetyAlert";
+import PeopleToAlert from "../screens/PeopleToAlert";
+import NewContact from "../screens/NewContact";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -33,6 +36,9 @@ const MainStack = () => {
       <Stack.Screen name="AlertSetting" component={AlertSetting} />
       <Stack.Screen name="AlertMeWhen" component={AlertMeWhen} />
       <Stack.Screen name="NotifyMeThrough" component={NotifyMeThrough} />
+      <Stack.Screen name="ActiveSafetyAlert" component={ActiveSafetyAlert} />
+      <Stack.Screen name="PeopleToAlert" component={PeopleToAlert} />
+      <Stack.Screen name="NewContact" component={NewContact} />
     </Stack.Navigator>
   );
 };

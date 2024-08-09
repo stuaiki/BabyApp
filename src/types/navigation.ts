@@ -10,6 +10,9 @@ export type MainStackParamList = {
   AlertSetting: undefined;
   AlertMeWhen: undefined;
   NotifyMeThrough: undefined;
+  ActiveSafetyAlert: undefined;
+  PeopleToAlert: undefined;
+  NewContact: undefined;
 };
 
 export type AuthStackParamList = {

@@ -8,6 +8,9 @@ import AlertSetting from "../screens/AlertSetting";
 import AlertMeWhen from "../screens/AlertMeWhen";
 import CustomDrawerContent from "../navigation/CustomDrawerContent ";
 import NotifyMeThrough from "../screens/NotifyMeThrough";
+import ActiveSafetyAlert from "../screens/ActiveSafetyAlert";
+import PeopleToAlert from "../screens/PeopleToAlert";
+import NewContact from "../screens/NewContact";
 
 const Drawer = createDrawerNavigator();
 
@@ -26,6 +29,7 @@ const DrawerNavigation = () => {
       <Drawer.Screen name="MonitorSeats" component={MonitorSeats} />
       <Drawer.Screen name="Account" component={Account} />
       <Drawer.Screen name="AlertSetting" component={AlertSetting} />
+      <Drawer.Screen name="ActiveSafetyAlert" component={ActiveSafetyAlert} />
       <Drawer.Screen
         name="AlertMeWhen"
         component={AlertMeWhen}
@@ -46,6 +50,34 @@ const DrawerNavigation = () => {
         options={{
           drawerItemStyle: styles.disabledItem,
           drawerLabel: "Notify Me Through",
+        }}
+        listeners={({ navigation }) => ({
+          drawerItemPress: (e) => {
+            // Prevent navigation if the item is disabled
+            e.preventDefault();
+          },
+        })}
+      />
+      <Drawer.Screen
+        name="PeopleToAlert"
+        component={PeopleToAlert}
+        options={{
+          drawerItemStyle: styles.disabledItem,
+          drawerLabel: "People To Alert",
+        }}
+        listeners={({ navigation }) => ({
+          drawerItemPress: (e) => {
+            // Prevent navigation if the item is disabled
+            e.preventDefault();
+          },
+        })}
+      />
+      <Drawer.Screen
+        name="NewContact"
+        component={NewContact}
+        options={{
+          drawerItemStyle: styles.disabledItem,
+          drawerLabel: "New Contact",
         }}
         listeners={({ navigation }) => ({
           drawerItemPress: (e) => {

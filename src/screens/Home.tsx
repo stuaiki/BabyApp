@@ -33,6 +33,7 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
 
         <TouchableOpacity
           style={[styles.wideButton, styles.buttonContainer, styles.background]}
+          onPress={() => navigation.navigate("ActiveSafetyAlert")}
         >
           <Image
             source={require("../../assets/favicon.png")}

@@ -39,7 +39,7 @@ const AlertSetting = ({
 
       <TouchableOpacity
         style={[styles.wideButton, styles.buttonContainer, styles.background]}
-        onPress={() => navigation.navigate("NotifyMeThrough")}
+        onPress={() => navigation.navigate("PeopleToAlert")}
       >
         <Text style={styles.text}>People to Alert</Text>
       </TouchableOpacity>
