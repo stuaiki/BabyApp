@@ -11,6 +11,7 @@ import NotifyMeThrough from "../screens/NotifyMeThrough";
 import ActiveSafetyAlert from "../screens/ActiveSafetyAlert";
 import PeopleToAlert from "../screens/PeopleToAlert";
 import NewContact from "../screens/NewContact";
+import SyncDevice from "../screens/SyncDevice";
 
 const Drawer = createDrawerNavigator();
 
@@ -26,10 +27,11 @@ const DrawerNavigation = () => {
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
       <Drawer.Screen name="Home" component={Home} />
-      <Drawer.Screen name="MonitorSeats" component={MonitorSeats} />
+      <Drawer.Screen name="Monitor Seats" component={MonitorSeats} />
       <Drawer.Screen name="Account" component={Account} />
-      <Drawer.Screen name="AlertSetting" component={AlertSetting} />
-      <Drawer.Screen name="ActiveSafetyAlert" component={ActiveSafetyAlert} />
+      <Drawer.Screen name="Alert Setting" component={AlertSetting} />
+      <Drawer.Screen name="Active Safety Alert" component={ActiveSafetyAlert} />
+      <Drawer.Screen name="Sync New Device" component={SyncDevice} />
       <Drawer.Screen
         name="AlertMeWhen"
         component={AlertMeWhen}

@@ -52,7 +52,10 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
           <Text style={styles.buttonText}>History</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.button, styles.background]}>
+        <TouchableOpacity
+          style={[styles.button, styles.background]}
+          onPress={() => navigation.navigate("SyncDevice")}
+        >
           <Image
             source={require("../../assets/favicon.png")}
             style={styles.icon}

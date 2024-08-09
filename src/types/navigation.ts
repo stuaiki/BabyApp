@@ -13,6 +13,7 @@ export type MainStackParamList = {
   ActiveSafetyAlert: undefined;
   PeopleToAlert: undefined;
   NewContact: undefined;
+  SyncDevice: undefined;
 };
 
 export type AuthStackParamList = {
@@ -20,4 +21,6 @@ export type AuthStackParamList = {
   CreateNewAccount: undefined;
   Drawer: undefined;
   Main: undefined;
+  NewContact: undefined;
+  PeopleToAlert: undefined;
 };

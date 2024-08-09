@@ -16,7 +16,7 @@ import AlertMeWhen from "../screens/AlertMeWhen";
 import NotifyMeThrough from "../screens/NotifyMeThrough";
 import ActiveSafetyAlert from "../screens/ActiveSafetyAlert";
 import PeopleToAlert from "../screens/PeopleToAlert";
-import NewContact from "../screens/NewContact";
+import SyncDevice from "../screens/SyncDevice";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -38,7 +38,7 @@ const MainStack = () => {
       <Stack.Screen name="NotifyMeThrough" component={NotifyMeThrough} />
       <Stack.Screen name="ActiveSafetyAlert" component={ActiveSafetyAlert} />
       <Stack.Screen name="PeopleToAlert" component={PeopleToAlert} />
-      <Stack.Screen name="NewContact" component={NewContact} />
+      <Stack.Screen name="SyncDevice" component={SyncDevice} />
     </Stack.Navigator>
   );
 };
