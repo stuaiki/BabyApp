@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { CheckBox } from "react-native-elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MainStackParamList } from "../types/navigation";
+import BleManager from 'react-native-ble-manager'
 
 const NotifyMeThrough = ({
   navigation,

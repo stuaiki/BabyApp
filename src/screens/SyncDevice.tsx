@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, View, Text, Image, TouchableOpacity } from "react-native";
+import BleManager from 'react-native-ble-manager'
 
 const SyncDevice = () => {
   return (

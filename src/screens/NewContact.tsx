@@ -9,6 +9,7 @@ import {
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../types/navigation";
 import { Alert } from "react-native";
+import BleManager from 'react-native-ble-manager'
 
 interface AddButtonProps {
   onPress: () => void;

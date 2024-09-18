@@ -27,11 +27,11 @@ const DrawerNavigation = () => {
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
       <Drawer.Screen name="Home" component={Home} />
-      <Drawer.Screen name="Monitor Seats" component={MonitorSeats} />
+      <Drawer.Screen name="MonitorSeats" component={MonitorSeats} />
       <Drawer.Screen name="Account" component={Account} />
-      <Drawer.Screen name="Alert Setting" component={AlertSetting} />
-      <Drawer.Screen name="Active Safety Alert" component={ActiveSafetyAlert} />
-      <Drawer.Screen name="Sync New Device" component={SyncDevice} />
+      <Drawer.Screen name="AlertSetting" component={AlertSetting} />
+      <Drawer.Screen name="ActiveSafetyAlert" component={ActiveSafetyAlert} />
+      <Drawer.Screen name="SyncNewDevice" component={SyncDevice} />
       <Drawer.Screen
         name="AlertMeWhen"
         component={AlertMeWhen}

@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { CheckBox } from "react-native-elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MainStackParamList } from "../types/navigation";
+import BleManager from 'react-native-ble-manager'
 
 const ActiveSafetyAlert = ({
   navigation,
@@ -48,7 +49,7 @@ const ActiveSafetyAlert = ({
       />
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.navigate("AlertSetting")}
+        onPress={() => navigation.navigate("Home")}
       >
         <Text style={styles.backButtonText}>Back</Text>
       </TouchableOpacity>

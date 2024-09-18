@@ -15,6 +15,7 @@ import { MainStackParamList } from "../types/navigation";
 import { useNavigation } from "@react-navigation/native";
 import Account from "./Account";
 import AlertSetting from "./AlertSetting";
+import BleManager from 'react-native-ble-manager'
 
 const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
   return (

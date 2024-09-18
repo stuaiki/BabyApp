@@ -14,6 +14,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MainStackParamList } from "../types/navigation";
 import { useNavigation } from "@react-navigation/native";
 import Account from "./Account";
+import BleManager from 'react-native-ble-manager'
 
 const PeopleToAlert = ({
   navigation,

@@ -14,6 +14,7 @@ export type MainStackParamList = {
   PeopleToAlert: undefined;
   NewContact: undefined;
   SyncDevice: undefined;
+  TemperatureMonitor: undefined;
 };
 
 export type AuthStackParamList = {
