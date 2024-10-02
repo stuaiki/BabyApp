@@ -9,20 +9,37 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#ffffff",
+      "plugins": [
+        [
+          "@config-plugins/react-native-ble-plx",
+          {
+            "isBackgroundEnable": true,
+            "modes": ["peripheral", "central"],
+            "bluethoothAlwaysPermission": "Always $(PRODUCT_NAME) to connect to bluetooth devices"
+          }
+        ]
+      ]
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "BabyApp.Android"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "BabyApp.Android"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c77d1a98-7a22-40c1-8117-820f31706959"
+      }
     }
   }
 }
