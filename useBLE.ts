@@ -6,46 +6,45 @@ import { BleManager, Device } from "react-native-ble-plx";
 
 import * as ExpoDevice from "expo-device";
 
+const bleManager = new BleManager();
 interface BluetoothLowEnergyApi {
   requestPermissions(): Promise<boolean>;
   scanForPeripherals(): void;
 }
 
 function useBLE(): BluetoothLowEnergyApi {
-  const bleManager = useMemo(() => new BleManager(), []);
-
   const [allDevices, setAllDevices] = useState<Device[]>([]);
 
   const requestAndroid31Permissions = async () => {
-    const bluetoothScanPermissions = await PermissionsAndroid.request(
+    const bluetoothScanPermission = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
       {
-        title: "Scan Permission",
-        message: "App requires Bluetooth Scanning",
+        title: "Location Permission",
+        message: "Bluetooth Low Energy requires Location",
         buttonPositive: "OK",
       }
     );
-    const bluetoothConnectPermissions = await PermissionsAndroid.request(
+    const bluetoothConnectPermission = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
       {
-        title: "Scan Permission",
-        message: "App requires Bluetooth Connecting",
+        title: "Location Permission",
+        message: "Bluetooth Low Energy requires Location",
         buttonPositive: "OK",
       }
     );
-    const bluetoothFineLocationPermission = await PermissionsAndroid.request(
+    const fineLocationPermission = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       {
-        title: "Fine Location",
-        message: "App requires fine location",
+        title: "Location Permission",
+        message: "Bluetooth Low Energy requires Location",
         buttonPositive: "OK",
       }
     );
 
     return (
-      bluetoothScanPermissions === "granted" &&
-      bluetoothConnectPermissions === "granted" &&
-      bluetoothFineLocationPermission === "granted"
+      bluetoothScanPermission === "granted" &&
+      bluetoothConnectPermission === "granted" &&
+      fineLocationPermission === "granted"
     );
   };
 
@@ -56,23 +55,48 @@ function useBLE(): BluetoothLowEnergyApi {
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
             title: "Location Permission",
-            message: "Bluetooth requires Location",
+            message: "Bluetooth Low Energy requires Location",
             buttonPositive: "OK",
           }
         );
-
         return granted === PermissionsAndroid.RESULTS.GRANTED;
       } else {
-        const isAndroid31PermissionGranted =
+        const isAndroid31PermissionsGranted =
           await requestAndroid31Permissions();
-        return isAndroid31PermissionGranted;
+
+        return isAndroid31PermissionsGranted;
       }
     } else {
       return true;
     }
   };
 
-  const scanForPeripherals = () => {};
+  const isDuplicteDevice = (devices: Device[], nextDevice: Device) =>
+    devices.findIndex((device) => nextDevice.id === device.id) > -1;
+
+  const scanForPeripherals = () => {
+    bleManager.startDeviceScan(null, null, (error, device) => {
+      if (error) {
+        console.log(error);
+      }
+
+      if (
+        device &&
+        (device.localName === "Arduino" || device.name === "Arduino")
+      ) {
+        setAllDevices((prevState: Device[]) => {
+          if (!isDuplicteDevice(prevState, device)) {
+            return [...prevState, device];
+          }
+          return prevState;
+        });
+      }
+    });
+
+    setTimeout(() => {
+      bleManager.stopDeviceScan();
+    }, 10000); // Stops scanning after 10 seconds
+  };
 
   return {
     scanForPeripherals,

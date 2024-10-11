@@ -17,8 +17,24 @@ import CreateAccount from "./src/screens/CreateNewAccount";
 import { MainStackParamList } from "../BabyApp/src/types/navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useEffect, useState } from "react";
+import useBLE from "./useBLE";
 
 const App = () => {
+  const { requestPermissions, scanForPeripherals } = useBLE();
+
+  useEffect(() => {
+    const initializeBLE = async () => {
+      const hasPermission = await requestPermissions();
+      if (hasPermission) {
+        scanForPeripherals(); // Start scanning if permissions are granted
+      } else {
+        console.log("Bluetooth permissions not granted");
+      }
+    };
+
+    initializeBLE(); // Run BLE initialization when the app starts
+  }, []);
+
   return (
     <>
       <RootNavigator />
