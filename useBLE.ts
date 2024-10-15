@@ -10,6 +10,7 @@ const bleManager = new BleManager();
 interface BluetoothLowEnergyApi {
   requestPermissions(): Promise<boolean>;
   scanForPeripherals(): void;
+  stopScanning(): void;
 }
 
 function useBLE(): BluetoothLowEnergyApi {
@@ -92,15 +93,16 @@ function useBLE(): BluetoothLowEnergyApi {
         });
       }
     });
+  };
 
-    setTimeout(() => {
-      bleManager.stopDeviceScan();
-    }, 10000); // Stops scanning after 10 seconds
+  const stopScanning = () => {
+    bleManager.stopDeviceScan();
   };
 
   return {
     scanForPeripherals,
     requestPermissions,
+    stopScanning,
   };
 }
 
