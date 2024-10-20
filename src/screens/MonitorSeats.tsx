@@ -14,9 +14,11 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MainStackParamList } from "../types/navigation";
 import { useNavigation } from "@react-navigation/native";
 import Account from "./Account";
-import BleManager from 'react-native-ble-manager'
+import BleManager from "react-native-ble-manager";
 
-const MonitorSeats = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
+const MonitorSeats = ({
+  navigation,
+}: NativeStackScreenProps<MainStackParamList>) => {
   return (
     <View style={[styles.container, styles.whitebackground]}>
       <View style={[styles.container, styles.whitebackground]}>
@@ -44,6 +46,7 @@ const MonitorSeats = ({ navigation }: NativeStackScreenProps<MainStackParamList>
 
         <TouchableOpacity
           style={[styles.wideButton, styles.buttonContainer, styles.background]}
+          onPress={() => navigation.navigate("SyncDevice")}
         >
           <Text style={styles.addSeat}>+ Add a Seat</Text>
         </TouchableOpacity>
