@@ -1,89 +1,162 @@
-import React, { useState, useEffect } from "react";
 import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  Modal,
   FlatList,
+  NativeEventEmitter,
+  PermissionsAndroid,
+  StyleSheet,
+  NativeModules,
+  Text,
+  View,
+  TouchableOpacity,
+  Modal,
   TouchableHighlight,
-  Alert,
+  Image,
   Button,
 } from "react-native";
-import { Device } from "react-native-ble-plx";
-import { useBluetooth } from "../../BluetoothContext"; // Import useBluetooth from context
+import React, { useEffect, useState } from "react";
+import BleManager from "react-native-ble-manager";
+import { TEMPERATURE_UUID } from "./Bluetooth/BleConstants";
 
-const SyncDevice = () => {
-  const {
-    scanForPeripherals,
-    stopScanning,
-    allDevices,
-    connectToDevice,
-    readTemperature,
-    isConnected,
-    connectedDevice,
-    requestPermissions,
-    setAllDevices,
-    scanning,
-    setScanning,
-    alertVisible,
-    setAlertVisible,
-    ensureConnected, // Add ensureConnected
-    retryReadTemperature, // Add retryReadTemperature
-  } = useBluetooth(); // Use BluetoothContext
+const ConnectDevice = () => {
+  const [isScanning, setIsScanning] = useState(false);
+  const [bleDevices, setBleDevices] = useState([]);
+  const BleManagerModule = NativeModules.BleManager;
+  const BleManagerEmitter = new NativeEventEmitter(BleManagerModule);
+  const [temperature, setTemperature] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectedDevice, setConnectedDevice] = useState<any>(null);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [allDevices, setAllDevices] = useState([]);
 
-  const [temperature, setTemperature] = useState<number | null>(null);
-
-  // Automatically connect and read temperature from the first available device
   useEffect(() => {
-    const connectAndReadTemperature = async () => {
-      if (allDevices.length > 0) {
-        const device = allDevices[0]; // Use the first available device
-        
-        // Ensure the device is connected before reading temperature
-        await ensureConnected(device);
+    BleManager.start({ showAlert: false }).then(() => {
+      console.log("Module initialized");
+    });
+  }, []);
 
-        // Retry reading the temperature with multiple attempts
-        const temp = await retryReadTemperature(device);
-        if (temp !== null) {
-          setTemperature(temp);
-        }
+  useEffect(() => {
+    BleManager.enableBluetooth().then(() => {
+      console.log("Bluetooth is enabled or confirmed");
+    });
+    requestPermission();
+  }, []);
+
+  useEffect(() => {
+    let stopListener = BleManagerEmitter.addListener(
+      "BleManagerStopScan",
+      () => {
+        setIsScanning(false);
+        console.log("Scan stopped");
+        handleGetConnectedDevices();
       }
+    );
+
+    let characteristicValueUpdate = BleManagerEmitter.addListener(
+      "BleManagerDidUpdateValueForCharacteristic",
+      (data) => {
+        console.log("Event BlueManagerDidUpdateValueForCharacteristic", data);
+        readCharacteristicFromEvent(data);
+      }
+    );
+
+    return () => {
+      stopListener.remove();
+      characteristicValueUpdate.remove();
     };
+  }, []);
 
-    // Run this function to connect and read temperature periodically
-    connectAndReadTemperature();
-  }, [allDevices, connectToDevice, readTemperature]);
+  const requestPermission = async () => {
+    await PermissionsAndroid.requestMultiple([
+      PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+      PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+      PermissionsAndroid.PERMISSIONS.BLUETOOTH_ADVERTISE,
+      PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    ]);
+  };
 
-  const handleStartScanning = async () => {
-    const permissionGranted = await requestPermissions();
-    if (!permissionGranted) {
-      Alert.alert(
-        "Permissions Required",
-        "Please grant Bluetooth and location permissions."
-      );
-      return;
-    }
-    setAllDevices([]); // Clear previously discovered devices
-    setScanning(true);
+  const handleStartScanning = () => {
     setAlertVisible(true);
-    scanForPeripherals(); // Start scanning
+    setIsScanning(true);
+    BleManager.scan([], 5, true).catch((error) => console.error(error));
+  };
 
-    setTimeout(() => {
-      setScanning(false);
-      stopScanning();
+  const handleGetConnectedDevices = () => {
+    BleManager.getDiscoveredPeripherals().then((result: any) => {
+      const filteredDevices = result.filter((device: any) => device.name);
+      setAllDevices(filteredDevices);
+      setBleDevices(filteredDevices);
+      console.log("Discovered peripherals:", result);
+    });
+  };
 
-      if (allDevices.length === 0) {
-        setAlertVisible(true); // Show modal if no devices were found
+  const handleConnectDevice = async (device: any) => {
+    try {
+      await BleManager.connect(device.id);
+      setConnectedDevice(device);
+      setIsConnected(true);
+      setAlertVisible(false);
+
+      const result = await BleManager.retrieveServices(device.id);
+      console.log("Connected to", result);
+      onServiceDiscovered(result, device);
+    } catch (error) {
+      console.error("Connection Error:", error);
+    }
+  };
+
+  const onServiceDiscovered = (result: any, item: any) => {
+    const services = result.services;
+    const characteristics = result.characteristics;
+    services.forEach((service: any) => {
+      const serviceUUID = service.uuid;
+      onChangeCharacteristics(serviceUUID, characteristics, item);
+    });
+  };
+
+  const onChangeCharacteristics = async (
+    serviceUUID: any,
+    result: any,
+    item: any
+  ) => {
+    for (const characteristic of result) {
+      const characteristicUUID = characteristic.characteristic;
+
+      if (characteristicUUID === TEMPERATURE_UUID) {
+        BleManager.startNotification(item.id, serviceUUID, characteristicUUID)
+          .then(() => {
+            console.log("notification started");
+          })
+          .catch((error) => {
+            console.log("notification error", error);
+          });
       }
-    }, 5000); // Scan for 5 seconds
+    }
   };
 
-  const handleConnectDevice = (device: Device) => {
-    connectToDevice(device);
-    setAlertVisible(false); // Close the modal after selecting the device
+  const readCharacteristicFromEvent = (data: any) => {
+    if (data.characteristic === TEMPERATURE_UUID) {
+      const temperature = byteToString(data.value);
+      setTemperature(temperature);
+      console.log("Temperature:", temperature);
+    }
   };
+
+  const byteToString = (value: number[]) => {
+    const buffer = new Uint8Array(value);
+    const tempValue = (buffer[0] | (buffer[1] << 8)) / 100;
+    return tempValue.toFixed(2);
+  };
+
+  const renderItem = ({ item }: any) => (
+    <View>
+      <TouchableOpacity
+        style={styles.bleCard}
+        onPress={() => handleConnectDevice(item)}
+      >
+        <Text style={styles.textleft}>{item.name || item.localName}</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -104,7 +177,7 @@ const SyncDevice = () => {
       <Text
         style={[
           styles.connectionStatus,
-          { color: isConnected ? "green" : "red" }, // Dynamic color based on connection status
+          { color: isConnected ? "green" : "red" },
         ]}
       >
         {isConnected
@@ -116,15 +189,13 @@ const SyncDevice = () => {
         style={styles.searchButton}
         onPress={handleStartScanning}
       >
-        <Text style={styles.buttonText}>{"Search Nearby"}</Text>
+        <Text style={styles.buttonText}>Search Nearby</Text>
       </TouchableOpacity>
 
-      {/* Temperature display */}
       <Text style={[styles.temperatureLabel, styles.topLeft]}>
-        {temperature !== null ? `${temperature.toFixed(2)}°C` : "Loading..."}
+        {temperature !== null ? `${temperature}°C` : "Loading..."}
       </Text>
 
-      {/* Custom Modal to show the available devices */}
       <Modal transparent={true} visible={alertVisible} animationType="slide">
         <View style={styles.modalBackground}>
           <View style={styles.alertBox}>
@@ -134,29 +205,17 @@ const SyncDevice = () => {
                 : "Available Devices"}
             </Text>
 
-            {scanning ? (
+            {isScanning ? (
               <Button
                 title="Stop Scanning"
-                onPress={() => setScanning(false)}
+                onPress={() => setIsScanning(false)}
               />
             ) : (
               <>
                 <FlatList
-                  data={allDevices.filter(
-                    (device) => device.name || device.localName
-                  )}
-                  keyExtractor={(device) => device.id}
-                  renderItem={({ item }) => (
-                    <TouchableHighlight
-                      style={styles.deviceItem}
-                      underlayColor="#DDD"
-                      onPress={() => handleConnectDevice(item)}
-                    >
-                      <Text style={styles.deviceText}>
-                        {item.name || item.localName}
-                      </Text>
-                    </TouchableHighlight>
-                  )}
+                  data={bleDevices}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={renderItem}
                 />
                 <Button title="Close" onPress={() => setAlertVisible(false)} />
               </>
@@ -257,6 +316,18 @@ const styles = StyleSheet.create({
     top: 10,
     left: 20,
   },
+  bleCard: {
+    width: "250%",
+    padding: 10,
+    alignSelf: "center",
+    marginVertical: 10,
+    backgroundColor: "lightblue",
+    elevation: 5,
+    borderRadius: 5,
+  },
+  textleft: {
+    textAlign: "center",
+  },
 });
 
-export default SyncDevice;
+export default ConnectDevice;
