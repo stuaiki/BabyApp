@@ -3,16 +3,16 @@ import {
   StyleSheet,
   View,
   Text,
-  Button,
   TouchableOpacity,
   Image,
   Modal,
   FlatList,
   TouchableHighlight,
   Alert,
+  Button,
 } from "react-native";
-import useBLE from "./../../useBLE"; // Assuming useBLE hook is in the same directory
-import { Device } from "react-native-ble-plx"; // Import Device type
+import { Device } from "react-native-ble-plx";
+import { useBluetooth } from "../../BluetoothContext"; // Import useBluetooth from context
 
 const SyncDevice = () => {
   const {
@@ -20,14 +20,41 @@ const SyncDevice = () => {
     stopScanning,
     allDevices,
     connectToDevice,
+    readTemperature,
+    isConnected,
+    connectedDevice,
     requestPermissions,
     setAllDevices,
-  } = useBLE();
-  const [scanning, setScanning] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
-  const [scanResultMessage, setScanResultMessage] = useState(
-    "Scanning for devices..."
-  );
+    scanning,
+    setScanning,
+    alertVisible,
+    setAlertVisible,
+    ensureConnected, // Add ensureConnected
+    retryReadTemperature, // Add retryReadTemperature
+  } = useBluetooth(); // Use BluetoothContext
+
+  const [temperature, setTemperature] = useState<number | null>(null);
+
+  // Automatically connect and read temperature from the first available device
+  useEffect(() => {
+    const connectAndReadTemperature = async () => {
+      if (allDevices.length > 0) {
+        const device = allDevices[0]; // Use the first available device
+        
+        // Ensure the device is connected before reading temperature
+        await ensureConnected(device);
+
+        // Retry reading the temperature with multiple attempts
+        const temp = await retryReadTemperature(device);
+        if (temp !== null) {
+          setTemperature(temp);
+        }
+      }
+    };
+
+    // Run this function to connect and read temperature periodically
+    connectAndReadTemperature();
+  }, [allDevices, connectToDevice, readTemperature]);
 
   const handleStartScanning = async () => {
     const permissionGranted = await requestPermissions();
@@ -38,33 +65,19 @@ const SyncDevice = () => {
       );
       return;
     }
-    setAllDevices([]);
+    setAllDevices([]); // Clear previously discovered devices
     setScanning(true);
     setAlertVisible(true);
-    setScanResultMessage("Scanning for devices...");
-    scanForPeripherals();
+    scanForPeripherals(); // Start scanning
 
     setTimeout(() => {
       setScanning(false);
       stopScanning();
 
       if (allDevices.length === 0) {
-        setScanResultMessage("No device was found.");
-      } else {
-        setAlertVisible(true); // Show modal with device list if devices are found
+        setAlertVisible(true); // Show modal if no devices were found
       }
-    }, 15000); // Scan for 15 seconds
-  };
-
-  const handleStopScanning = () => {
-    setScanning(false);
-    stopScanning();
-    setScanResultMessage("Scanning stopped.");
-  };
-
-  const closeAlert = () => {
-    setAlertVisible(false);
-    setScanResultMessage("Scanning for devices...");
+    }, 5000); // Scan for 5 seconds
   };
 
   const handleConnectDevice = (device: Device) => {
@@ -88,6 +101,17 @@ const SyncDevice = () => {
         resizeMode="contain"
       />
 
+      <Text
+        style={[
+          styles.connectionStatus,
+          { color: isConnected ? "green" : "red" }, // Dynamic color based on connection status
+        ]}
+      >
+        {isConnected
+          ? `Connected to: ${connectedDevice?.name || "Device"}`
+          : "Not connected"}
+      </Text>
+
       <TouchableOpacity
         style={styles.searchButton}
         onPress={handleStartScanning}
@@ -95,25 +119,32 @@ const SyncDevice = () => {
         <Text style={styles.buttonText}>{"Search Nearby"}</Text>
       </TouchableOpacity>
 
+      {/* Temperature display */}
+      <Text style={[styles.temperatureLabel, styles.topLeft]}>
+        {temperature !== null ? `${temperature.toFixed(2)}°C` : "Loading..."}
+      </Text>
+
       {/* Custom Modal to show the available devices */}
       <Modal transparent={true} visible={alertVisible} animationType="slide">
         <View style={styles.modalBackground}>
           <View style={styles.alertBox}>
             <Text style={styles.alertText}>
               {allDevices.length === 0
-                ? scanResultMessage
+                ? "No device found"
                 : "Available Devices"}
             </Text>
 
             {scanning ? (
-              <Button title="Stop Scanning" onPress={handleStopScanning} />
+              <Button
+                title="Stop Scanning"
+                onPress={() => setScanning(false)}
+              />
             ) : (
               <>
-                {/* List available devices in the modal */}
                 <FlatList
                   data={allDevices.filter(
                     (device) => device.name || device.localName
-                  )} // Filter only named devices
+                  )}
                   keyExtractor={(device) => device.id}
                   renderItem={({ item }) => (
                     <TouchableHighlight
@@ -127,7 +158,7 @@ const SyncDevice = () => {
                     </TouchableHighlight>
                   )}
                 />
-                <Button title="Close" onPress={closeAlert} />
+                <Button title="Close" onPress={() => setAlertVisible(false)} />
               </>
             )}
           </View>
@@ -208,6 +239,23 @@ const styles = StyleSheet.create({
   deviceText: {
     fontSize: 16,
     textAlign: "center",
+  },
+  connectionStatus: {
+    fontSize: 16,
+    marginVertical: 10,
+  },
+  temperatureLabel: {
+    position: "absolute",
+    backgroundColor: "#EEF6FF",
+    padding: 5,
+    borderRadius: 50,
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  topLeft: {
+    top: 10,
+    left: 20,
   },
 });
 

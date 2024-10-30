@@ -18,6 +18,7 @@ import ActiveSafetyAlert from "../screens/ActiveSafetyAlert";
 import PeopleToAlert from "../screens/PeopleToAlert";
 import SyncDevice from "../screens/SyncDevice";
 import TemperatureMonitor from "../screens/TemperatureMonitor";
+import ConnectDevice from "../screens/Bluetooth/ConnectDevice";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -41,6 +42,7 @@ const MainStack = () => {
       <Stack.Screen name="PeopleToAlert" component={PeopleToAlert} />
       <Stack.Screen name="SyncDevice" component={SyncDevice} />
       <Stack.Screen name="TemperatureMonitor" component={TemperatureMonitor} />
+      <Stack.Screen name="ConnectDevice" component={ConnectDevice} />
     </Stack.Navigator>
   );
 };

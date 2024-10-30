@@ -1,12 +1,51 @@
-import React from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { StyleSheet, View, Text, Image, TouchableOpacity } from "react-native";
-import BleManager from 'react-native-ble-manager'
+import { useBluetooth } from '../../BluetoothContext'; // Import useBluetooth from context
 
 const TemperatureMonitor = () => {
+  // Access BLE functionality via the context
+  const {
+    allDevices,
+    connectToDevice,
+    readTemperature,
+    isConnected,
+    connectedDevice
+  } = useBluetooth();
+
+  const [temperature, setTemperature] = useState<number | null>(null);
+
+  // Example: Connect to a device and read temperature when component mounts
+  useEffect(() => {
+    const connectAndReadTemperature = async () => {
+      // Example: Automatically connecting to the first available device
+      if (allDevices.length > 0) {
+        const device = allDevices[0]; // For example, use the first available device
+        await connectToDevice(device);
+        const temp = await readTemperature(device);
+        if (temp !== null) {
+          setTemperature(temp);
+        }
+      }
+    };
+
+    connectAndReadTemperature();
+  }, [allDevices, connectToDevice, readTemperature]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.nameText}>Alexa Rose</Text>
       <Text style={styles.statusText}>Baby in seat</Text>
+
+      <Text
+        style={[
+          styles.connectionStatus,
+          { color: isConnected ? "green" : "red" }, // Dynamic color based on connection status
+        ]}
+      >
+        {isConnected
+          ? `Connected to: ${connectedDevice?.name || "Device"}`
+          : "Not connected"}
+      </Text>
 
       <View style={styles.imageContainer}>
         <Image
@@ -15,10 +54,16 @@ const TemperatureMonitor = () => {
           resizeMode="contain"
         />
 
-        {/* Temperature indicators */}
-        <Text style={[styles.temperatureLabel, styles.topLeft]}>75°F</Text>
-        <Text style={[styles.temperatureLabel, styles.topRight]}>74°F</Text>
-        <Text style={[styles.temperatureLabel, styles.bottomLeft]}>73°F</Text>
+        {/* Display the temperature values */}
+        <Text style={[styles.temperatureLabel, styles.topLeft]}>
+          {temperature !== null ? `${temperature.toFixed(2)}°C` : "Loading..."}
+        </Text>
+        <Text style={[styles.temperatureLabel, styles.topRight]}>
+          {temperature !== null ? `${temperature.toFixed(2)}°C` : "Loading..."}
+        </Text>
+        <Text style={[styles.temperatureLabel, styles.bottomLeft]}>
+          {temperature !== null ? `${temperature.toFixed(2)}°C` : "Loading..."}
+        </Text>
       </View>
 
       <TouchableOpacity style={styles.searchButton}>
@@ -105,6 +150,10 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "bold",
+  },
+  connectionStatus: {
+    fontSize: 16,
+    marginVertical: 10,
   },
 });
 

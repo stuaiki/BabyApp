@@ -45,7 +45,8 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
       </View>
 
       <View style={styles.gridContainer}>
-        <TouchableOpacity style={[styles.button, styles.background]}>
+        <TouchableOpacity style={[styles.button, styles.background]}
+        onPress={() => navigation.navigate("ConnectDevice")}>
           <Image
             source={require("../../assets/favicon.png")}
             style={styles.icon}

@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
 import { PermissionsAndroid, Platform, Alert } from "react-native";
-import { BleManager, Device } from "react-native-ble-plx";
+import { BleManager as PlxBleManager, Device } from "react-native-ble-plx"; // Alias the BleManager from react-native-ble-plx
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ExpoDevice from "expo-device";
+import BleManager from "react-native-ble-manager"; // Keep the BleManager from react-native-ble-manager
 
-const bleManager = new BleManager();
+const bleManager = new PlxBleManager();
 
 const LAST_CONNECTED_DEVICE_KEY = "lastConnectedDeviceId";
 
+interface BondedDevice {
+  id: string;
+  name: string;
+  rssi: number;
+  // Add any other properties relevant to a bonded device
+}
 interface BluetoothLowEnergyApi {
   requestPermissions(): Promise<boolean>;
   scanForPeripherals(): void;
@@ -21,15 +28,15 @@ interface BluetoothLowEnergyApi {
   handleConnectDevice(device: Device): void;
   setAllDevices: React.Dispatch<React.SetStateAction<Device[]>>;
   readTemperature(device: Device): Promise<number | null>;
-  ensureConnected(device: Device): Promise<void>;
-  retryReadTemperature(device: Device, retries?: number): Promise<number | null>;
 }
 
-
 function useBLE(): BluetoothLowEnergyApi {
+  useEffect(() => {
+    BleManager.start({ showAlert: false });
+  }, []);
   const [allDevices, setAllDevices] = useState<Device[]>([]);
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null); // Track connected device
-  const [temperature, setTemperature] = useState<number | null>(null);
+
   // Store the last connected device's ID in AsyncStorage
   const storeLastConnectedDevice = async (device: Device) => {
     try {
@@ -57,17 +64,8 @@ function useBLE(): BluetoothLowEnergyApi {
   // Function to read temperature from a connected device
   const readTemperature = async (device: Device): Promise<number | null> => {
     try {
-      if (!(await device.isConnected())) {
-        console.error("Device is not connected.");
-        return null;
-      }
-
-      await device.discoverAllServicesAndCharacteristics();
-
       const services = await device.services();
-      const service = services.find(
-        (s) => s.uuid === "0000181a-0000-1000-8000-00805f9b34fb"
-      );
+      const service = services.find((s) => s.uuid === "181A");
 
       if (!service) {
         console.error("Environmental Sensing Service not found.");
@@ -76,7 +74,7 @@ function useBLE(): BluetoothLowEnergyApi {
 
       const characteristics = await service.characteristics();
       const temperatureCharacteristic = characteristics.find(
-        (c) => c.uuid === "00002a6e-0000-1000-8000-00805f9b34fb"
+        (c) => c.uuid === "2A6E"
       );
 
       if (!temperatureCharacteristic) {
@@ -84,21 +82,17 @@ function useBLE(): BluetoothLowEnergyApi {
         return null;
       }
 
-      // Read the characteristic value
       const characteristicValue = await temperatureCharacteristic.read();
       const base64Value = characteristicValue.value;
 
       if (base64Value) {
+        // Convert the Base64-encoded value to a buffer
         const buffer = Buffer.from(base64Value, "base64");
 
-        // BLE temperature is usually a signed 16-bit integer in units of 0.01°C
-        const temperatureRaw = buffer.readInt16LE(0);
+        // Assuming the data is a 32-bit float in little-endian format
+        const temperature = buffer.readFloatLE(0);
 
-        // Convert the raw value to actual temperature in Celsius
-        const temperature = temperatureRaw / 100;
-
-        console.log("Temperature:", temperature);
-
+        // Return the temperature value
         return temperature;
       } else {
         console.error("Error: Characteristic value is null.");
@@ -108,28 +102,6 @@ function useBLE(): BluetoothLowEnergyApi {
       console.error("Error reading temperature characteristic:", error);
       return null;
     }
-  };
-
-  const ensureConnected = async (device: Device) => {
-    if (!(await device.isConnected())) {
-      console.log("Device is not connected, attempting to reconnect...");
-      await connectToDevice(device); // Use your connectToDevice function to reconnect
-    }
-  };
-
-  const retryReadTemperature = async (
-    device: Device,
-    retries: number = 3
-  ): Promise<number | null> => {
-    for (let attempt = 0; attempt < retries; attempt++) {
-      const temp = await readTemperature(device);
-      if (temp !== null) {
-        return temp; // Success
-      }
-      console.warn(`Retrying temperature read (attempt ${attempt + 1})...`);
-    }
-    console.error("Failed to read temperature after multiple attempts.");
-    return null;
   };
 
   // Request Android 31+ specific Bluetooth permissions
@@ -169,99 +141,17 @@ function useBLE(): BluetoothLowEnergyApi {
   // Connect to a BLE device
   const connectToDevice = async (device: Device) => {
     try {
+      // Optionally, cancel connection first if connected
       if (await device.isConnected()) {
-        console.log("Device is already connected");
-        setConnectedDevice(device);
-        return;
+        await device.cancelConnection();
       }
-
-      await device.connect();
-      console.log("Connected to device:", device.name || device.localName);
-
-      await device.discoverAllServicesAndCharacteristics();
-      console.log("Discovered services and characteristics");
-
-      // Now call discoverServicesAndCharacteristics
-      await discoverServicesAndCharacteristics(device);
-
-      setConnectedDevice(device); // Update connected device state
-      storeLastConnectedDevice(device); // Store device for future reconnections
+      // Attempt to connect, allowing forced reconnection
+      await device.connect({ autoConnect: false });
+      console.log("Connected to device:", device.name);
     } catch (error) {
-      console.log("Connection error:", error);
+      console.error("Failed to connect:", error);
     }
   };
-
-  const delay = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
-
-  const connectAndReadTemperature = async () => {
-    try {
-      // Example: Automatically connecting to the first available device
-      if (allDevices.length > 0) {
-        const device = allDevices[0]; // For example, use the first available device
-        await connectToDevice(device);
-
-        // Add a delay to ensure the device is ready
-        await delay(1000); // Delay for 1 second before reading
-
-        // Now read the temperature
-        const temp = await readTemperature(device);
-        if (temp !== null) {
-          setTemperature(temp);
-        }
-      }
-    } catch (error) {
-      console.error("Error in connectAndReadTemperature:", error);
-    }
-  };
-
-  const discoverServicesAndCharacteristics = async (device: Device) => {
-    try {
-      await device.discoverAllServicesAndCharacteristics();
-
-      const services = await device.services();
-      for (const service of services) {
-        console.log(`Service UUID: ${service.uuid}`);
-
-        const characteristics = await service.characteristics();
-        for (const characteristic of characteristics) {
-          console.log(`Characteristic UUID: ${characteristic.uuid}`);
-
-          // Optionally, attempt to read each characteristic
-          try {
-            const value = await characteristic.read();
-            console.log(`Characteristic Value (Base64): ${value.value}`);
-          } catch (error) {
-            console.log(`Error reading characteristic: ${characteristic.uuid}`);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error discovering services and characteristics:", error);
-    }
-  };
-
-  useEffect(() => {
-    const connectAndReadTemperature = async () => {
-      try {
-        if (allDevices.length > 0) {
-          const device = allDevices[0]; // Use the first available device
-          await connectToDevice(device); // Connect to the device
-
-          await delay(1000); // Ensure a 1-second delay before reading
-
-          const temp = await readTemperature(device); // Attempt to read temperature
-          if (temp !== null) {
-            setTemperature(temp); // Set temperature state if successful
-          }
-        }
-      } catch (error) {
-        console.error("Error in connectAndReadTemperature:", error);
-      }
-    };
-
-    connectAndReadTemperature();
-  }, [allDevices]);
 
   // Disconnect from the current device
   const disconnectDevice = async () => {
@@ -322,12 +212,21 @@ function useBLE(): BluetoothLowEnergyApi {
   const isDuplicateDevice = (devices: Device[], nextDevice: Device) =>
     devices.findIndex((device) => nextDevice.id === device.id) > -1;
 
+  const isDeviceConnected = async (device: Device) => {
+    try {
+      const connected = await device.isConnected();
+      return connected;
+    } catch (error) {
+      console.log("Error checking device connection:", error);
+      return false;
+    }
+  };
+
   // Handle device connection via user interaction
   const handleConnectDevice = (device: Device) => {
-    const deviceName = device.name || device.localName || "Unnamed Device";
     Alert.alert(
       "Connect to Device",
-      `Do you want to connect to ${deviceName}?`,
+      `Do you want to connect to ${device.name || device.localName}?`,
       [
         {
           text: "Cancel",
@@ -343,27 +242,44 @@ function useBLE(): BluetoothLowEnergyApi {
     );
   };
 
-  // Scan for BLE devices
+  const isBondedDevice = async (device: Device) => {
+    try {
+      const bondedDevices: BondedDevice[] = await (
+        BleManager as any
+      ).getBondedDevices();
+
+      const isBonded = bondedDevices.some(
+        (bondedDevice: BondedDevice) => bondedDevice.id === device.id
+      );
+
+      return isBonded;
+    } catch (error) {
+      console.error("Error checking bond state:", error);
+      return false;
+    }
+  };
+
   const scanForPeripherals = () => {
     console.log("Scanning for Bluetooth devices...");
-    bleManager.startDeviceScan(null, null, (error, device) => {
+    bleManager.startDeviceScan(null, null, async (error, device) => {
       if (error) {
         console.log("Scan error:", error);
         return;
       }
 
       if (device) {
-        const deviceName = device.name || device.localName || "Unnamed Device";
-        console.log("Found device:", deviceName);
-
-        setAllDevices((prevState: Device[]) => {
-          if (!isDuplicateDevice(prevState, device)) {
-            const updatedDevices = [...prevState, device];
-            console.log("Devices in list:", updatedDevices.length);
-            return updatedDevices;
-          }
-          return prevState;
-        });
+        const bonded = await isBondedDevice(device);
+        if (!bonded) {
+          console.log("Found unbonded device:", device.name);
+          setAllDevices((prevState: Device[]) => {
+            if (!isDuplicateDevice(prevState, device)) {
+              return [...prevState, device];
+            }
+            return prevState;
+          });
+        } else {
+          console.log("Skipping bonded device:", device.name);
+        }
       }
     });
   };
@@ -378,16 +294,14 @@ function useBLE(): BluetoothLowEnergyApi {
     requestPermissions,
     stopScanning,
     allDevices,
-    setAllDevices,
     connectToDevice,
     reconnectLastDevice,
     disconnectDevice,
     isConnected, // Add this flag to track if connected
     handleConnectDevice,
+    setAllDevices,
     readTemperature,
     connectedDevice,
-    ensureConnected,
-    retryReadTemperature,
   };
 }
 

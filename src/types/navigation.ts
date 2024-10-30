@@ -15,6 +15,7 @@ export type MainStackParamList = {
   NewContact: undefined;
   SyncDevice: undefined;
   TemperatureMonitor: undefined;
+  ConnectDevice: undefined;
 };
 
 export type AuthStackParamList = {
