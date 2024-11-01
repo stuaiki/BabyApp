@@ -14,10 +14,12 @@ interface BluetoothLowEnergyApi {
   stopScanning(): void;
   allDevices: Device[];
   connectedDevice: Device | null;
+  setConnectedDevice: React.Dispatch<React.SetStateAction<Device | null>>;
   connectToDevice(device: Device): Promise<void>;
   reconnectLastDevice(): Promise<Device | null>;
   disconnectDevice(): Promise<void>;
   isConnected: boolean;
+  setIsConnected: React.Dispatch<React.SetStateAction<boolean>>;
   handleConnectDevice(device: Device): void;
   setAllDevices: React.Dispatch<React.SetStateAction<Device[]>>;
   readTemperature(device: Device): Promise<number | null>;
@@ -30,6 +32,12 @@ function useBLE(): BluetoothLowEnergyApi {
   const [allDevices, setAllDevices] = useState<Device[]>([]);
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null); // Track connected device
   const [temperature, setTemperature] = useState<number | null>(null);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsConnected(connectedDevice !== null);
+  }, [connectedDevice]);
+
   // Store the last connected device's ID in AsyncStorage
   const storeLastConnectedDevice = async (device: Device) => {
     try {
@@ -50,9 +58,6 @@ function useBLE(): BluetoothLowEnergyApi {
       return null;
     }
   };
-
-  // Check if a device is connected
-  const isConnected = connectedDevice !== null;
 
   // Function to read temperature from a connected device
   const readTemperature = async (device: Device): Promise<number | null> => {
@@ -386,8 +391,10 @@ function useBLE(): BluetoothLowEnergyApi {
     handleConnectDevice,
     readTemperature,
     connectedDevice,
+    setConnectedDevice,
     ensureConnected,
     retryReadTemperature,
+    setIsConnected,
   };
 }
 

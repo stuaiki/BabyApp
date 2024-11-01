@@ -14,10 +14,12 @@ interface BluetoothContextProps {
   handleConnectDevice: (device: Device) => void;
   readTemperature: (device: Device) => Promise<number | null>;
   isConnected: boolean;
+  setIsConnected: React.Dispatch<React.SetStateAction<boolean>>;
   disconnectDevice: () => Promise<void>;
   connectedDevice: Device | null;
-  scanning: boolean; // State for scanning status
-  setScanning: React.Dispatch<React.SetStateAction<boolean>>; // Setter for scanning state
+  setConnectedDevice: React.Dispatch<React.SetStateAction<Device | null>>;
+  isScanning: boolean; // State for scanning status
+  setIsScanning: React.Dispatch<React.SetStateAction<boolean>>; // Setter for scanning state
   alertVisible: boolean; // Modal visibility state
   setAlertVisible: React.Dispatch<React.SetStateAction<boolean>>; // Setter for alert visibility
   ensureConnected(device: Device): Promise<void>;
@@ -25,6 +27,8 @@ interface BluetoothContextProps {
     device: Device,
     retries?: number
   ): Promise<number | null>;
+  temperature: number | null; // Add temperature here
+  setTemperature: React.Dispatch<React.SetStateAction<number | null>>; // Add setTemperature here
 }
 
 // Create a context with default values
@@ -46,13 +50,17 @@ export const BluetoothProvider = ({ children }: { children: ReactNode }) => {
     readTemperature,
     isConnected,
     disconnectDevice,
+    setConnectedDevice,
     connectedDevice,
+    setIsConnected,
     ensureConnected, // Add ensureConnected
     retryReadTemperature, // Add retryReadTemperature
   } = useBLE(); // Use the useBLE hook
 
+  const [temperature, setTemperature] = useState<number | null>(null);
+
   // State to manage Bluetooth scanning status
-  const [scanning, setScanning] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
 
   // State to manage modal visibility
   const [alertVisible, setAlertVisible] = useState(false);
@@ -84,12 +92,16 @@ export const BluetoothProvider = ({ children }: { children: ReactNode }) => {
         isConnected,
         disconnectDevice,
         connectedDevice,
-        scanning, // New scanning state here
-        setScanning, // Control scanning state from context
+        setIsConnected,
+        setConnectedDevice,
+        isScanning, // New scanning state here
+        setIsScanning, // Control scanning state from context
         alertVisible, // Control alert modal visibility
         setAlertVisible, // Set alert modal visibility
         ensureConnected, // Add ensureConnected
         retryReadTemperature, // Add retryReadTemperature
+        temperature, // Provide temperature state
+        setTemperature, // Provide setTemperature function
       }}
     >
       {children}

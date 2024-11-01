@@ -14,18 +14,27 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import BleManager from "react-native-ble-manager";
-import { TEMPERATURE_UUID } from "./Bluetooth/BleConstants";
+import { TEMP_CHARACTERISTIC_UUID } from "./Bluetooth/BleConstants";
+import { useBluetooth } from "../../BluetoothContext";
 
-const ConnectDevice = () => {
-  const [isScanning, setIsScanning] = useState(false);
+const SyncDevice = () => {
+  const {
+    isScanning,
+    setIsScanning, // Use if managed in context
+    temperature, // Get temperature from context
+    setTemperature, // Set temperature in context
+    isConnected,
+    connectedDevice,
+    allDevices,
+    setAllDevices,
+    setConnectedDevice,
+    setIsConnected,
+  } = useBluetooth();
+
   const [bleDevices, setBleDevices] = useState([]);
   const BleManagerModule = NativeModules.BleManager;
   const BleManagerEmitter = new NativeEventEmitter(BleManagerModule);
-  const [temperature, setTemperature] = useState<string | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [connectedDevice, setConnectedDevice] = useState<any>(null);
   const [alertVisible, setAlertVisible] = useState(false);
-  const [allDevices, setAllDevices] = useState([]);
 
   useEffect(() => {
     BleManager.start({ showAlert: false }).then(() => {
@@ -77,7 +86,9 @@ const ConnectDevice = () => {
   const handleStartScanning = () => {
     setAlertVisible(true);
     setIsScanning(true);
-    BleManager.scan([], 5, true).catch((error) => console.error(error));
+    BleManager.scan([], 5, true)
+      .then(() => console.log("Scanning started..."))
+      .catch((error) => console.error(error));
   };
 
   const handleGetConnectedDevices = () => {
@@ -121,7 +132,7 @@ const ConnectDevice = () => {
     for (const characteristic of result) {
       const characteristicUUID = characteristic.characteristic;
 
-      if (characteristicUUID === TEMPERATURE_UUID) {
+      if (characteristicUUID === TEMP_CHARACTERISTIC_UUID) {
         BleManager.startNotification(item.id, serviceUUID, characteristicUUID)
           .then(() => {
             console.log("notification started");
@@ -134,17 +145,17 @@ const ConnectDevice = () => {
   };
 
   const readCharacteristicFromEvent = (data: any) => {
-    if (data.characteristic === TEMPERATURE_UUID) {
-      const temperature = byteToString(data.value);
+    if (data.characteristic === TEMP_CHARACTERISTIC_UUID) {
+      const temperature = byteToNumber(data.value);
       setTemperature(temperature);
       console.log("Temperature:", temperature);
     }
   };
 
-  const byteToString = (value: number[]) => {
+  const byteToNumber = (value: number[]): number => {
     const buffer = new Uint8Array(value);
     const tempValue = (buffer[0] | (buffer[1] << 8)) / 100;
-    return tempValue.toFixed(2);
+    return parseFloat(tempValue.toFixed(2));
   };
 
   const renderItem = ({ item }: any) => (
@@ -200,9 +211,7 @@ const ConnectDevice = () => {
         <View style={styles.modalBackground}>
           <View style={styles.alertBox}>
             <Text style={styles.alertText}>
-              {allDevices.length === 0
-                ? "No device found"
-                : "Available Devices"}
+              {isScanning ? "Searching..." : "Available Devices"}
             </Text>
 
             {isScanning ? (
@@ -330,4 +339,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ConnectDevice;
+export default SyncDevice;

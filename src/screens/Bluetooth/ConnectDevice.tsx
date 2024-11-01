@@ -14,7 +14,7 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import { TEMPERATURE_UUID } from "./BleConstants";
+import { TEMP_CHARACTERISTIC_UUID } from "./BleConstants";
 import { Characteristic } from "react-native-ble-plx";
 import { readBuilderProgram, reduceEachLeadingCommentRange } from "typescript";
 
@@ -128,7 +128,7 @@ const ConnectDevice = () => {
   const readCharacteristicFromEvent = (data: any) => {
     const { service, characteristic, value } = data;
 
-    if (characteristic == TEMPERATURE_UUID) {
+    if (characteristic == TEMP_CHARACTERISTIC_UUID) {
       const temperature = byteToString(value);
       setTemperature(temperature);
       console.log("temperature", temperature);
@@ -171,7 +171,7 @@ const ConnectDevice = () => {
     for (const characteristic of result) {
       const characteristicUUID = characteristic.characteristic;
 
-      if (characteristicUUID === TEMPERATURE_UUID) {
+      if (characteristicUUID === TEMP_CHARACTERISTIC_UUID) {
         BleManager.startNotification(item.id, serviceUUID, characteristicUUID)
           .then(() => {
             console.log("notification started");
