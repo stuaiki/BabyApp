@@ -110,7 +110,7 @@ function useBLE(): BluetoothLowEnergyApi {
         return null;
       }
     } catch (error) {
-      console.error("Error reading temperature characteristic:", error);
+      // console.error("Error reading temperature characteristic:", error);
       return null;
     }
   };

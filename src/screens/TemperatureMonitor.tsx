@@ -15,10 +15,10 @@ import BleManager from "react-native-ble-manager";
 const TemperatureMonitor = () => {
   const {
     allDevices,
-    connectToDevice,
     isConnected,
     connectedDevice,
     setTemperature,
+    setIsConnected,
   } = useBluetooth();
 
   const [temperature, setTemperatureLocal] = useState<number | null>(null);
@@ -26,20 +26,20 @@ const TemperatureMonitor = () => {
   const BleManagerModule = NativeModules.BleManager;
   const BleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-  useEffect(() => {
-    const connectAndReadTemperature = async () => {
-      try {
-        const device = connectedDevice || allDevices[0];
-        if (device) {
-          subscribeToCharacteristicUpdates();
-        } else {
-          console.error("No device found to connect and read temperature.");
-        }
-      } catch (error) {
-        console.error("Error connecting or reading temperature:", error);
+  const connectAndReadTemperature = async () => {
+    try {
+      const device = connectedDevice || allDevices[0];
+      if (device) {
+        subscribeToCharacteristicUpdates();
+      } else {
+        console.error("No device found to connect and read temperature.");
       }
-    };
+    } catch (error) {
+      console.error("Error connecting or reading temperature:", error);
+    }
+  };
 
+  useEffect(() => {
     connectAndReadTemperature();
 
     return () => {
@@ -73,6 +73,20 @@ const TemperatureMonitor = () => {
     return parseFloat(tempValue.toFixed(2));
   };
 
+  const disconnect = async () => {
+    try {
+      if (connectedDevice) {
+        await BleManager.disconnect(connectedDevice.id);
+        console.log("Disconnected from device");
+        setIsConnected(false);
+      } else {
+        console.warn("No device connected to disconnect.");
+      }
+    } catch (error) {
+      console.error("Failed to disconnect:", error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.nameText}>Alexa Rose</Text>
@@ -84,9 +98,11 @@ const TemperatureMonitor = () => {
           { color: isConnected ? "green" : "red" },
         ]}
       >
-        {isConnected
-          ? `Connected to: ${connectedDevice?.name || "Device"}`
-          : "Not connected"}
+        {isConnected ? (
+          <Text style={{ fontWeight: "bold" }}>Baby in seat</Text>
+        ) : (
+          "Not connected"
+        )}
       </Text>
 
       <View style={styles.imageContainer}>
@@ -96,13 +112,31 @@ const TemperatureMonitor = () => {
           resizeMode="contain"
         />
         <Text style={[styles.temperatureLabel, styles.bottomRight]}>
-          {temperature !== null ? `${temperature}°C` : "Loading..."}
+          {temperature !== null ? (
+            `${temperature}°C`
+          ) : (
+            <Text style={{ fontSize: 18.5 }}>Loading...</Text>
+          )}
         </Text>
       </View>
 
       <TouchableOpacity style={styles.searchButton}>
         <Text style={styles.buttonText}>Adjust Air Flow</Text>
       </TouchableOpacity>
+
+      {/* Disconnect Button */}
+      {isConnected ? (
+        <TouchableOpacity style={styles.disconnectButton} onPress={disconnect}>
+          <Text style={styles.disconnectButtonText}>Disconnect</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={styles.disconnectButton}
+          onPress={connectAndReadTemperature}
+        >
+          <Text style={styles.disconnectButtonText}>Reconnect</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -143,7 +177,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
     fontSize: 22,
     fontWeight: "bold",
-    width: 100,
+    width: 105,
     height: 50,
   },
   bottomRight: {
@@ -177,6 +211,18 @@ const styles = StyleSheet.create({
   connectionStatus: {
     fontSize: 16,
     marginVertical: 10,
+  },
+  disconnectButton: {
+    backgroundColor: "#FF6347",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  disconnectButtonText: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 

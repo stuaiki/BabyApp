@@ -12,13 +12,12 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { Image } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MainStackParamList } from "../types/navigation";
-import { useNavigation } from "@react-navigation/native";
-import Account from "./Account";
-import BleManager from "react-native-ble-manager";
+import { useBluetooth } from "../../BluetoothContext";
 
 const MonitorSeats = ({
   navigation,
 }: NativeStackScreenProps<MainStackParamList>) => {
+  const { allDevices, isConnected, connectedDevice } = useBluetooth();
   return (
     <View style={[styles.container, styles.whitebackground]}>
       <View style={[styles.container, styles.whitebackground]}>
@@ -31,7 +30,21 @@ const MonitorSeats = ({
             source={require("../../assets/carseatRender.png")}
             style={styles.icon}
           />
-          <Text style={styles.text}>Alexa Rose</Text>
+          <Text style={styles.text}>
+            Alexa Rose {"\n"}
+            <Text
+              style={[
+                styles.connectionStatus,
+                { color: isConnected ? "green" : "red" },
+              ]}
+            >
+              {isConnected ? (
+                <Text style={{ fontWeight: "bold" }}>Connected</Text>
+              ) : (
+                "Not connected"
+              )}
+            </Text>
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -135,6 +148,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "grey",
     padding: 15,
+  },
+  connectionStatus: {
+    fontSize: 13,
+    marginVertical: 10,
   },
 });
 
