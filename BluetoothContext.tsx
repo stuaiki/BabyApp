@@ -29,6 +29,7 @@ interface BluetoothContextProps {
   ): Promise<number | null>;
   temperature: number | null; // Add temperature here
   setTemperature: React.Dispatch<React.SetStateAction<number | null>>; // Add setTemperature here
+  // sendTemperatureToAWS: (temperature: number) => Promise<void>; // Provide function to send temperature to AWS
 }
 
 // Create a context with default values
@@ -64,6 +65,38 @@ export const BluetoothProvider = ({ children }: { children: ReactNode }) => {
 
   // State to manage modal visibility
   const [alertVisible, setAlertVisible] = useState(false);
+
+  // const sendTemperatureToAWS = async (temperature: number) => {
+  //   try {
+  //     console.log("Sending temperature to AWS:", temperature);
+  //     const response = await fetch(
+  //       "https://your-aws-api-endpoint.com/temperature",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ temperature }),
+  //       }
+  //     );
+
+  //     if (response.ok) {
+  //       console.log("Temperature successfully sent to AWS");
+  //     } else {
+  //       console.error("Failed to send temperature to AWS", response.status);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error sending temperature to AWS:", error);
+  //   }
+  // };
+
+  // Monitor temperature changes and trigger the function to send data to AWS
+  // useEffect(() => {
+  //   if (temperature !== null) {
+  //     console.log("Current temperature:", temperature);
+  //     sendTemperatureToAWS(temperature);
+  //   }
+  // }, [temperature]); // This effect runs when `temperature` changes
 
   // Initialize BLE on mount
   useEffect(() => {
@@ -102,6 +135,7 @@ export const BluetoothProvider = ({ children }: { children: ReactNode }) => {
         retryReadTemperature, // Add retryReadTemperature
         temperature, // Provide temperature state
         setTemperature, // Provide setTemperature function
+        // sendTemperatureToAWS,
       }}
     >
       {children}

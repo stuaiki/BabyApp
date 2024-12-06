@@ -193,7 +193,7 @@ const SyncDevice = () => {
       >
         {isConnected
           ? `Connected to: ${connectedDevice?.name || "Device"}`
-          : "Not connected"}
+          : ""}
       </Text>
 
       <TouchableOpacity

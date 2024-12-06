@@ -15,7 +15,7 @@ import { MainStackParamList } from "../types/navigation";
 import { useNavigation } from "@react-navigation/native";
 import Account from "./Account";
 import AlertSetting from "./AlertSetting";
-import BleManager from 'react-native-ble-manager'
+import BleManager from "react-native-ble-manager";
 
 const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
   return (
@@ -37,7 +37,7 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
           onPress={() => navigation.navigate("ActiveSafetyAlert")}
         >
           <Image
-            source={require("../../assets/favicon.png")}
+            source={require("../../assets/bell.png")}
             style={styles.icon}
           />
           <Text style={styles.text}>Active Safety Alerts</Text>
@@ -45,8 +45,10 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
       </View>
 
       <View style={styles.gridContainer}>
-        <TouchableOpacity style={[styles.button, styles.background]}
-        onPress={() => navigation.navigate("ConnectDevice")}>
+        <TouchableOpacity
+          style={[styles.button, styles.background]}
+          onPress={() => navigation.navigate("ConnectDevice")}
+        >
           <Image
             source={require("../../assets/favicon.png")}
             style={styles.icon}
@@ -59,7 +61,7 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
           onPress={() => navigation.navigate("SyncDevice")}
         >
           <Image
-            source={require("../../assets/favicon.png")}
+            source={require("../../assets/addicon.png")}
             style={styles.icon}
           />
           <Text style={styles.buttonText}>Add a Seat</Text>
@@ -70,7 +72,7 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
           onPress={() => navigation.navigate("AlertSetting")}
         >
           <Image
-            source={require("../../assets/favicon.png")}
+            source={require("../../assets/alerticon.png")}
             style={styles.icon}
           />
           <Text style={styles.buttonText}>Alert Settings</Text>
@@ -81,7 +83,7 @@ const Home = ({ navigation }: NativeStackScreenProps<MainStackParamList>) => {
           onPress={() => navigation.navigate("Account")}
         >
           <Image
-            source={require("../../assets/favicon.png")}
+            source={require("../../assets/accounticon.png")}
             style={styles.icon}
           />
           <Text style={styles.buttonText}>Account Settings</Text>
