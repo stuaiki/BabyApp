@@ -10,6 +10,7 @@ import RootNavigator from "./src/navigation/RootNavigator";
 import { BluetoothProvider, useBluetooth } from "./BluetoothContext"; // Import BluetoothProvider
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TEMP_CHARACTERISTIC_UUID } from "../BabyApp/src/screens/Bluetooth/BleConstants";
+import { sendTemperatureData } from "./src/api/submitData";
 
 const TemperatureNotifier = () => {
   const {
@@ -70,6 +71,19 @@ const TemperatureNotifier = () => {
     return parseFloat(tempValue.toFixed(2));
   };
 
+  const sendTemperatureToAWS = async (temperature: number) => {
+    try {
+      // Replace 123 and 456 with actual user_id and seat_id
+      const user_id = 123;
+      const seat_id = 456;
+  
+      await sendTemperatureData(user_id, seat_id, temperature);
+      console.log("Temperature data successfully sent to AWS");
+    } catch (error) {
+      console.error("Error sending temperature data to AWS:", error);
+    }
+  };
+
   useEffect(() => {
     if (isConnected && temperature !== null) {
       console.log("New temperature value:", temperature);
@@ -86,35 +100,6 @@ const TemperatureNotifier = () => {
   }, [temperature, isConnected]);
 
   return null;
-};
-
-const sendDataToRDS = async (bluetoothData: string): Promise<void> => {
-  try {
-    const response = await fetch(
-      "https://your-api-gateway-endpoint.amazonaws.com/production",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          bluetoothData, // The data collected from the Bluetooth device
-          timestamp: new Date().toISOString(), // Add a timestamp if needed
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to send data to Lambda");
-    }
-
-    const result = await response.json();
-    console.log("Data sent successfully:", result);
-    Alert.alert("Success", "Data sent to the server!");
-  } catch (error) {
-    console.error("Error sending data:", error);
-    Alert.alert("Error", "Failed to send data.");
-  }
 };
 
 const App = () => {
