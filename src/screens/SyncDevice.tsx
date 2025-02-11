@@ -203,9 +203,9 @@ const SyncDevice = () => {
         <Text style={styles.buttonText}>Search Nearby</Text>
       </TouchableOpacity>
 
-      <Text style={[styles.temperatureLabel, styles.topLeft]}>
+      {/* <Text style={[styles.temperatureLabel, styles.topLeft]}>
         {temperature !== null ? `${temperature}°C` : "Loading..."}
-      </Text>
+      </Text> */}
 
       <Modal transparent={true} visible={alertVisible} animationType="slide">
         <View style={styles.modalBackground}>

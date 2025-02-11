@@ -15,13 +15,18 @@
           "@config-plugins/react-native-ble-plx",
           {
             "isBackgroundEnable": true,
-            "modes": ["peripheral", "central"],
+            "modes": [
+              "peripheral",
+              "central"
+            ],
             "bluethoothAlwaysPermission": "Always $(PRODUCT_NAME) to connect to bluetooth devices"
           }
         ]
       ]
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "BabyApp.Android"
@@ -40,6 +45,7 @@
       "eas": {
         "projectId": "c77d1a98-7a22-40c1-8117-820f31706959"
       }
-    }
+    },
+    "owner": "aikitakaku"
   }
 }

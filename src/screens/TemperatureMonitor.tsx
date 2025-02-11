@@ -10,7 +10,9 @@ import {
 } from "react-native";
 import { useBluetooth } from "../../BluetoothContext"; // Import useBluetooth from context
 import { TEMP_CHARACTERISTIC_UUID } from "./Bluetooth/BleConstants";
+import { FAN_CONTROL_UUID } from "./Bluetooth/BleConstants";
 import BleManager from "react-native-ble-manager";
+import { SERVICE_UUID } from "./Bluetooth/BleConstants";
 
 const TemperatureMonitor = () => {
   const {
@@ -22,6 +24,8 @@ const TemperatureMonitor = () => {
   } = useBluetooth();
 
   const [temperature, setTemperatureLocal] = useState<number | null>(null);
+  const [isAuto, setIsAuto] = useState(false); // 🔴 Track Auto button state
+  const [isOn, setIsOn] = useState(false); // 🔴 Track On/Off button state
 
   const BleManagerModule = NativeModules.BleManager;
   const BleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -87,6 +91,51 @@ const TemperatureMonitor = () => {
     }
   };
 
+  const manualControl = async (command: string) => {
+    try {
+      if (!connectedDevice) {
+        console.warn("No connected device found.");
+        return;
+      }
+
+      let finalCommand = command;
+
+      if (command === "Auto") {
+        if (isAuto) {
+          finalCommand = "Off"; // If Auto is ON, clicking turns it OFF
+          setIsAuto(false);
+        } else {
+          finalCommand = "Auto"; // If Auto is OFF, clicking turns it ON
+          setIsAuto(true);
+        }
+      } else if (command === "On") {
+        if (isOn) {
+          finalCommand = "Off"; // If it's already ON, turn it OFF
+          setIsOn(false);
+        } else {
+          finalCommand = "On"; // If it's OFF, turn it ON
+          setIsOn(true);
+        }
+      }
+
+      const commandBytes = new TextEncoder().encode(finalCommand);
+      console.log(
+        `Sending command: ${finalCommand} to UUID: ${FAN_CONTROL_UUID}`
+      );
+
+      await BleManager.write(
+        connectedDevice.id,
+        SERVICE_UUID,
+        FAN_CONTROL_UUID,
+        Array.from(commandBytes)
+      );
+
+      console.log("Command sent successfully!");
+    } catch (error) {
+      console.error("Failed to send command:", error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.nameText}>Alexa Rose</Text>
@@ -120,11 +169,35 @@ const TemperatureMonitor = () => {
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.searchButton}>
-        <Text style={styles.buttonText}>Adjust Air Flow</Text>
-      </TouchableOpacity>
+      <View style={{ flexDirection: "row", gap: 20 }}>
+        {/* 🔴 Auto Button that Changes Color */}
+        <TouchableOpacity
+          style={[
+            styles.searchButton,
+            { backgroundColor: isAuto ? "#EE4B2B" : "#ADD8E6" }, // 🔴 Red when Auto is ON, Blue when OFF
+          ]}
+          onPress={() => manualControl("Auto")}
+        >
+          <Text style={styles.buttonText}>
+            {isAuto ? "Auto" : "Auto"} {/* 🔄 Toggle text */}
+          </Text>
+        </TouchableOpacity>
 
-      {/* Disconnect Button */}
+        {/* Toggle Button for On/Off */}
+        <TouchableOpacity
+          style={[
+            styles.searchButton,
+            { backgroundColor: isOn ? "#EE4B2B" : "#ADD8E6" }, // Toggle color based on On state
+          ]}
+          onPress={() => manualControl("On")}
+        >
+          <Text style={styles.buttonText}>
+            {isOn ? "Turn OFF" : "Turn ON"} {/* Toggle text */}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Disconnect Button
       {isConnected ? (
         <TouchableOpacity style={styles.disconnectButton} onPress={disconnect}>
           <Text style={styles.disconnectButtonText}>Disconnect</Text>
@@ -136,7 +209,7 @@ const TemperatureMonitor = () => {
         >
           <Text style={styles.disconnectButtonText}>Reconnect</Text>
         </TouchableOpacity>
-      )}
+      )} */}
     </View>
   );
 };

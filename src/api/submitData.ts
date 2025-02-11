@@ -22,9 +22,9 @@ export const sendTemperatureData = async (
     const response = await axios.post(
       "https://your-api-id.execute-api.region.amazonaws.com/dev/submitData",
       {
-        user_id,
         seat_id,
         temperature,
+        user_id,
       }
     );
     console.log("Temperature data sent successfully:", response.data);

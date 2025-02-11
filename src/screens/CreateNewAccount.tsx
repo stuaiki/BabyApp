@@ -15,7 +15,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import CustomInput from "../Components/CustomInput/CustomInput";
 import { PickerStyle } from "react-native-picker-select";
 import { Alert } from "react-native";
-import BleManager from 'react-native-ble-manager'
+import BleManager from "react-native-ble-manager";
 
 interface CreateButtonProps {
   onPress: () => void;
